@@ -35,7 +35,7 @@
             </ul>
             <ul class="navbar-nav absolute-right">
               <li>
-                <a href="login.php">Login</a> / <a href="register.php">Register</a>
+                <a href="{{url('login')}}">Login</a> 
               </li>
             </ul>
             

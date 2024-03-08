@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\CvController;
-
+use App\Http\Controllers\UserController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -34,6 +34,9 @@ Route::post('/search', [JobController::class, 'search']);
 Route::post('/cv_submit', [CvController::class, 'store']);
 Route::get('/cv', [CvController::class, 'index']);
 Route::get('/job/create', [JobController::class, 'create']);
+
+Route::get('/login', [UserController::class, 'index']);
+Route::post('/login', [UserController::class, 'login']);
 /*
 Testing code
 Route::get('/hello', function(){
