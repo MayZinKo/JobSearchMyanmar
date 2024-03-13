@@ -35,8 +35,25 @@ Route::post('/cv_submit', [CvController::class, 'store']);
 Route::get('/cv', [CvController::class, 'index']);
 Route::get('/job/create', [JobController::class, 'create']);
 
+
 Route::get('/login', [UserController::class, 'index']);
 Route::post('/login', [UserController::class, 'login']);
+Route::get('/logout', [UserController::class, 'logout']);
+
+Route::middleware('auth')->group(function () {
+    Route::get('/joblist',[JobController::class, 'list']);
+
+    Route::get('/job_edit/{id}',[JobController::class, 'edit']);
+    Route::post('/job/update', [JobController::class, 'update']);
+
+    Route::get('/insert',[JobController::class, 'create']);
+    Route::post('/job/save', [JobController::class, 'store']);
+
+    Route::post('/delete',[JobController::class, 'destroy']);
+    Route::get('/delete/{id}',[JobController::class, 'destroy_']);
+});
+
+
 /*
 Testing code
 Route::get('/hello', function(){

@@ -12,7 +12,7 @@ class Job extends Model
 
     public function job_cv()
     {
-        return $this->hasMany('App\Model\Job_cv');
+        return $this->hasMany(Job_cv::class, 'job_id');
     }
 
     public function category()

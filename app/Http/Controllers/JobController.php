@@ -8,6 +8,7 @@ use App\Services\CategoryService;
 use App\Services\JobtypeService;
 use App\Services\JobService;
 use App\Services\CompanyService;
+use App\Services\JobCvService;
 use Illuminate\Support\Facades\Validator;
 
 class JobController extends Controller
@@ -21,6 +22,7 @@ class JobController extends Controller
         $this->JobtypeService=new JobtypeService();
         $this->JobService=new JobService();
         $this->CompanyService=new CompanyService();
+        $this->JobCvService=new JobCvService();
     }
     /**
      * Display a listing of the resource.
@@ -42,6 +44,18 @@ class JobController extends Controller
         return view('job_list')->with($data);
     }
 
+       /**
+     * Display the specified resource.
+     */
+    public function show($id)
+    {
+        $data['distinct_category'] = $this->JobService->distinct_category();
+        $data['job']=$this->JobService->get($id);
+        $data['jobs'] = $this->JobService->get_latest(3);
+        $data['job_type'] = $this->JobtypeService->get_all(); 
+        return view('job_detail')->with($data);
+    }
+
     public function search(Request $request)
     {
         $validator = Validator::make($request->all(),[
@@ -61,6 +75,12 @@ class JobController extends Controller
         }
         return redirect('job')->with($data);    
     }
+
+    public function list()
+    {
+        $data['jobs'] = $this->JobService->getall();
+        return view('admin_joblist')->with($data);
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -69,6 +89,7 @@ class JobController extends Controller
         $data['city']=$this->CityService->get_all();
         $data['cat']=$this->CategoryService->get_all();
         $data['job_type']=$this->JobtypeService->get_all();
+        $data['comp']=$this->CompanyService->get_all();
         return view('job_create')->with($data);
     }
 
@@ -77,22 +98,31 @@ class JobController extends Controller
      */
     public function store(Request $request)
     {
-        $this->JobService->save($request);
-        return $this->index();
+        $validator = Validator::make($request->all(),[
+             'title' => 'required',
+             'requirement' => 'required',
+             'privilege' => 'required',
+             'address' => 'required',
+             'category' => 'required|numeric',
+             'company' => 'required|numeric',
+             'city' => 'required|numeric',
+             'job_type' => 'required|numeric',
+        ]);
+       
+        if ($validator->fails()) 
+        {
+            $data['messages'] = $validator->messages();
+        }
+        else
+        {
+            $this->JobService->save($request);
+        }
+        // return $this->list();
+        return redirect('joblist');
+        
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-
-        $data['distinct_category'] = $this->JobService->distinct_category();
-        $data['job']=$this->JobService->get($id);
-        $data['jobs'] = $this->JobService->get_latest(3);
-        $data['job_type'] = $this->JobtypeService->get_all(); 
-        return view('job_detail')->with($data);
-    }
+ 
 
     /**
      * Show the form for editing the specified resource.
@@ -102,28 +132,59 @@ class JobController extends Controller
         $data['city']=$this->CityService->get_all();
         $data['cat']=$this->CategoryService->get_all();
         $data['job_type']=$this->JobtypeService->get_all();
+        $data['comp']=$this->CompanyService->get_all();
         $data['job']=$this->JobService->get($id);
-       // dd($data['job']);
+        $data['errors'] = session()->has('messages') ? session('messages') : null;
         return view('job_update')->with($data);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
-        $this->JobService->update($request);
+        $validator = Validator::make($request->all(),[
+             'title' => 'required',
+             'requirement' => 'required',
+             'privilege' => 'required',
+             'address' => 'required',
+             'category' => 'required|numeric',
+             'company' => 'required|numeric',
+             'city' => 'required|numeric',
+             'job_type' => 'required|numeric',
+        ]);
+       
+        if ($validator->fails()) 
+        {
+            $data['messages'] = $validator->messages();
+            $data['job_id'] = $request->job_id;
+        }
+        else
+        {
+            $data['job_id'] = $this->JobService->update($request);
+        }
+
+        return redirect(url('job_edit/' . $data['job_id']));   
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request)
     {
-        //
+        //dd(request()->all());
+        $job_id = $request->job_id;
+        $this->JobCvService->delete($job_id);
+        // var_dump($job_cv);
     }
+    public function destroy_($job_id)
+    {
+     
+        $this->JobCvService->delete($job_id);
+        $this->JobService->delete($job_id);
+        return redirect('joblist');
 
-
+    }
 }
 
 

@@ -13,7 +13,6 @@ class JobService
 	function __construct()
 	{
 		$this->job=new Job();
-    	
 	}
 	function get_latest($limit)
 	{
@@ -22,6 +21,10 @@ class JobService
 	function get_all()
 	{
 		return Job::with('city','company','job_type')->paginate(3);
+	}
+	function getall()
+	{
+		return Job::with('city','company','job_type')->withCount('job_cv')->get();
 	}
 	function get_one($id)
 	{
@@ -48,60 +51,73 @@ class JobService
 	{
 		$this->job=$this->job::find($request->job_id);
 		
-		$this->job->job_title=$request->job_title;
-		$this->job->job_requirement=htmlspecialchars($request->job_req);
-        $this->job->job_description =htmlspecialchars($request->job_des);
-        $this->job->privilege=htmlspecialchars($request->job_pri);
-        $this->job->address=$request->job_add;
-        $this->job->category_id=$request->job_cat;
-        // $this->job->company_id=1;
-        $this->job->job_type_id =$request->job_type;
-        $this->job->city_id =$request->city;
-        $this->job->exp_date =$request->exp_date;
-        $this->job->save();
+		$this->job->job_title=htmlspecialchars($request->title);
+		$this->job->job_requirement=htmlspecialchars($request->requirement);
+	       $this->job->privilege =htmlspecialchars($request->privilege);
+	       $this->job->address=htmlspecialchars($request->address);
+	      
+	       $this->job->category_id=$request->category;
+	       $this->job->company_id=$request->company;
+	       $this->job->job_type_id =$request->job_type;
+	       $this->job->city_id =$request->city;
+
+	       $this->job->save();
+	       return $request->job_id;
 	}
 	function save($request)
 	{
-	
-		$job=new Job();
-        $job->job_title=$request->job_title;
-        $job->job_description=htmlspecialchars($request->job_des);
-        $job->job_requirement=htmlspecialchars($request->job_req);
-        $job->privilege=htmlspecialchars($request->job_pri);
-        $job->address=$request->job_add;
-        $job->category_id=$request->job_cat;
-        $job->company_id=1;
-        $job->job_type_id =$request->job_type;
-        $job->city_id =$request->city;
-        $job->exp_date =$request->exp_date;
-        $result=$job->save();
-        return $result;
+		$this->job->job_title=htmlspecialchars($request->title);
+        	$this->job->job_requirement=htmlspecialchars($request->requirement);
+	       $this->job->privilege =htmlspecialchars($request->privilege);
+	       $this->job->address=htmlspecialchars($request->address);
+
+	       $this->job->category_id=$request->category;
+	       $this->job->company_id=$request->company;
+	       $this->job->job_type_id =$request->job_type;
+	       $this->job->city_id =$request->city;
+
+	       $this->job->save();
 	}
 	function search($request)
 	{
 		$check =  array();
 
-		if($request->job_title != null ){ 
-        $check[] = ['job.job_title', 'LIKE', '%' . $request->job_title . '%'];
+		if($request->job_title != null )
+		{ 
+        		$check[] = ['job.job_title', 'LIKE', '%' . $request->job_title . '%'];
          
-      	}
-      	if($request->category != null ){ 
-        $check[] = ['job.category_id', '=',$request->category];
-      	}
-      	if($request->city != null ){ 
-        $check[] = ['job.city_id', '=',$request->city];
-      	}
+      		}
+	      	if($request->category != null )
+	      	{ 
+	        	$check[] = ['job.category_id', '=',$request->category];
+	      	}
+	      	if($request->city != null )
+	      	{ 
+	        	$check[] = ['job.city_id', '=',$request->city];
+	      	}
       	
 
-      	return Job::
-               join('city', 'city.id', '=', 'job.city_id')
-               ->join('country', 'country.id', '=', 'city.country_id')
-			   ->join('category', 'category.id', '=', 'job.category_id')
-			   ->join('company', 'company.id', '=', 'job.company_id')
-			   ->join('job_type', 'job_type.id', '=', 'job.job_type_id')
-			   ->where($check)
-			   ->paginate(3);	
+      		return Job::join('city', 'city.id', '=', 'job.city_id')
+              ->join('country', 'country.id', '=', 'city.country_id')
+		->join('category', 'category.id', '=', 'job.category_id')
+		->join('company', 'company.id', '=', 'job.company_id')
+		->join('job_type', 'job_type.id', '=', 'job.job_type_id')
+		->where($check)
+		->paginate(3);	
+	}
 
+	function delete($job_id)
+	{
+		$job = $this->job::find($job_id);
+		 
+		 if ($job) {
+		 	$job->delete();
+		 }
 	}
 }
  ?>
+
+
+
+
+

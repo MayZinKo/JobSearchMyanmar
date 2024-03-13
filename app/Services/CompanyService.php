@@ -19,4 +19,9 @@ class CompanyService
 		return Company::where('company_type_id',$company_type_id)->get();
 	}
 
+	function get_all()
+ 	{
+ 		return Company::get();
+ 	}
+
 } ?>
